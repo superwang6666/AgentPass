@@ -1,7 +1,7 @@
-"""
-Test Suite for AgentPass Middleware
-Tests the Express middleware functionality
-"""
+/**
+ * Test Suite for AgentPass Middleware
+ * Tests the Express middleware functionality
+ */
 
 // Mock test runner - can be run with Jest or Mocha
 const assert = require('assert');

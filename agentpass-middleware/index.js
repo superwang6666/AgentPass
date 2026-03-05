@@ -5,9 +5,15 @@
 
 /**
  * Create AgentPass middleware gate
+ * @param {Object} options - Configuration options
+ * @param {number} options.maxBodySize - Maximum request body size in bytes (default: 1MB)
+ * @param {string} options.endpoint - Custom endpoint path (default: /api/agent/entry)
  * @returns {Function} Express middleware
  */
-function gate() {
+function gate(options = {}) {
+  const maxBodySize = options.maxBodySize || 1 * 1024 * 1024; // 1MB default
+  const endpoint = options.endpoint || '/api/agent/entry';
+  
   return (req, res, next) => {
     // Initialize agentContext on request
     req.agentContext = {};
@@ -21,14 +27,27 @@ function gate() {
       }
     });
 
-    // Only process /api/agent/entry requests
-    if (req.path !== '/api/agent/entry' || req.method !== 'POST') {
+    // Only process configured endpoint requests
+    if (req.path !== endpoint || req.method !== 'POST') {
       return next();
     }
 
-    // Parse and validate request body
+    // Parse and validate request body with size limit
     let body = '';
+    let bodySize = 0;
+    
     req.on('data', chunk => {
+      bodySize += chunk.length;
+      
+      // Check size limit
+      if (bodySize > maxBodySize) {
+        req.destroy();
+        return res.status(413).json({
+          error: 'Payload too large',
+          message: `Request body exceeds ${maxBodySize} bytes limit`
+        });
+      }
+      
       body += chunk.toString();
     });
 

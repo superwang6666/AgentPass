@@ -6,7 +6,6 @@
  */
 
 const express = require('express');
-const path = require('path');
 
 // In production, use: const agentPass = require('agentpass-middleware');
 const agentPass = require('./index.js');

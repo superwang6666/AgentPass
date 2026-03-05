@@ -5,7 +5,11 @@ Agent-side implementation for machine-to-machine login
 
 import requests
 import json
+import logging
 from typing import Dict, Any, Optional
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 
 class AgentPassClient:
@@ -52,7 +56,7 @@ class AgentPassClient:
             else:
                 return None
         except Exception as e:
-            print(f"Discovery failed: {e}")
+            logger.debug(f"Discovery failed for {url}: {e}")
             return None
 
     def request_site(self, url: str, task: Dict[str, Any], 
@@ -82,7 +86,7 @@ class AgentPassClient:
             # Step 1: Discover protocol support
             config = self.discover(url)
             if not config:
-                print(f"Website {url} does not support AgentPass protocol")
+                logger.debug(f"Website {url} does not support AgentPass protocol")
                 return None
 
             # Step 2: Build handshake packet
@@ -112,11 +116,11 @@ class AgentPassClient:
             if response.status_code == 200:
                 return response.json()
             else:
-                print(f"Request failed with status {response.status_code}: {response.text}")
+                logger.debug(f"Request to {request_url} failed with status {response.status_code}")
                 return None
 
         except Exception as e:
-            print(f"Request failed: {e}")
+            logger.debug(f"Request failed: {e}")
             return None
 
     def request_batch(self, url: str, tasks: list) -> list:
